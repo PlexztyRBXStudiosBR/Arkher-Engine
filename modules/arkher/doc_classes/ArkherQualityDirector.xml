@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class name="ArkherQualityDirector" inherits="Node" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+		Native Arkher quality director: dynamic resolution with hysteresis, FSR/FSR2 upscaling, per-tier rendering settings and a thermal model that keeps sustained load inside the device's thermal budget.
+	</brief_description>
+	<description>
+		Arkher pillar 1 ("photoreal on any phone"), native version. Unlike [ArkherAutoQuality] (which only recommends), this director applies the changes: it drives the root [Window]'s content scale (dynamic resolution), selects the upscaler ([constant UPSCALER_AUTO] uses FSR) and applies per-tier settings (shadows, SDFGI, SSAO, SSIL, glow, volumetric fog, SSR, reflections, MSAA) to [member world_environment] and every [Light3D] in the scene.
+		[b]Thermal model ("teto térmico"):[/b] [method get_thermal_state] rises with sustained rendering load and falls while the frame budget is met. When it crosses [member thermal_warning_threshold], the effective max scale is lowered (down to 50% of [member max_scale] at full heat) and the [signal thermal_warning] signal is emitted. Tune [member thermal_heat_rate] per device — start conservative on the Itel A70 (the Arkher mobile floor) and loosen on mid/high phones.
+	</description>
+	<tutorials>
+	</tutorials>
+	<methods>
+		<method name="get_current_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+				Current dynamic-resolution scale (between [member min_scale] and the effective max scale).
+			</description>
+		</method>
+		<method name="get_current_tier" qualifiers="const">
+			<return type="int" />
+			<description>
+				Currently applied tier: 0 = low, 1 = medium, 2 = high.
+			</description>
+		</method>
+		<method name="get_effective_max_scale" qualifiers="const">
+			<return type="float" />
+			<description>
+				[member max_scale] reduced by the current thermal ceiling. The director will never scale above this value.
+			</description>
+		</method>
+		<method name="get_thermal_state" qualifiers="const">
+			<return type="float" />
+			<description>
+				Current thermal state, from 0 (cold) to 1 (overheated).
+			</description>
+		</method>
+	</methods>
+	<members>
+		<member name="enabled" type="bool" setter="set_enabled" getter="is_enabled" default="true">
+			Turns the director on/off. When disabled, the last applied scale/tier is kept.
+		</member>
+		<member name="target_fps" type="float" setter="set_target_fps" getter="get_target_fps" default="60.0">
+			Target frames per second. The director lowers the render scale until it can hold this.
+		</member>
+		<member name="min_scale" type="float" setter="set_min_scale" getter="get_min_scale" default="0.4">
+			Lowest render scale allowed (0.4 = 40% of the window resolution).
+		</member>
+		<member name="max_scale" type="float" setter="set_max_scale" getter="get_max_scale" default="1.0">
+			Highest render scale allowed before the thermal ceiling.
+		</member>
+		<member name="down_after_seconds" type="float" setter="set_down_after_seconds" getter="get_down_after_seconds" default="0.5">
+			Seconds below the target FPS before the scale steps down (hysteresis against flapping).
+		</member>
+		<member name="up_after_seconds" type="float" setter="set_up_after_seconds" getter="get_up_after_seconds" default="2.0">
+			Seconds above the target FPS before the scale steps back up.
+		</member>
+		<member name="step_down" type="float" setter="set_step_down" getter="get_step_down" default="0.1">
+			How much the scale decreases per step.
+		</member>
+		<member name="step_up" type="float" setter="set_step_up" getter="get_step_up" default="0.05">
+			How much the scale increases per step (smaller than [member step_down] to avoid oscillation).
+		</member>
+		<member name="upscaler" type="int" setter="set_upscaler" getter="get_upscaler" enum="Upscaler" default="UPSCALER_AUTO">
+			How the lower internal resolution is upscaled to the window. [constant UPSCALER_AUTO] uses FSR in this engine.
+		</member>
+		<member name="fsr_sharpness" type="float" setter="set_fsr_sharpness" getter="get_fsr_sharpness" default="0.2">
+			FSR sharpness (0 = smooth, 1 = sharper).
+		</member>
+		<member name="auto_configure_scale_mode" type="bool" setter="set_auto_configure_scale_mode" getter="get_auto_configure_scale_mode" default="true">
+			When the window's content scale mode is still disabled, the director configures it (viewport mode) so its scale actually applies to 3D.
+		</member>
+		<member name="world_environment" type="NodePath" setter="set_world_environment" getter="get_world_environment">
+			The [WorldEnvironment] whose [Environment] effects are toggled per tier. Leave empty to only manage scale, lights and MSAA.
+		</member>
+		<member name="shadows_per_tier" type="PackedInt32Array" setter="set_shadows_per_tier" getter="get_shadows_per_tier" default="[0, 1, 1]">
+			Shadows on/off per tier [code][low, medium, high][/code], applied to every [Light3D] in the scene.
+		</member>
+		<member name="shadow_distance_per_tier" type="PackedFloat32Array" setter="set_shadow_distance_per_tier" getter="get_shadow_distance_per_tier" default="[30.0, 60.0, 100.0]">
+			Shadow fade distance per tier [code][low, medium, high][/code].
+		</member>
+		<member name="sdfgi_per_tier" type="PackedInt32Array" setter="set_sdfgi_per_tier" getter="get_sdfgi_per_tier" default="[0, 0, 1]">
+			SDFGI on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="ssao_per_tier" type="PackedInt32Array" setter="set_ssao_per_tier" getter="get_ssao_per_tier" default="[0, 1, 1]">
+			SSAO on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="ssil_per_tier" type="PackedInt32Array" setter="set_ssil_per_tier" getter="get_ssil_per_tier" default="[0, 1, 1]">
+			SSIL on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="glow_per_tier" type="PackedInt32Array" setter="set_glow_per_tier" getter="get_glow_per_tier" default="[0, 1, 1]">
+			Glow on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="volumetric_per_tier" type="PackedInt32Array" setter="set_volumetric_per_tier" getter="get_volumetric_per_tier" default="[0, 0, 1]">
+			Volumetric fog on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="ssr_per_tier" type="PackedInt32Array" setter="set_ssr_per_tier" getter="get_ssr_per_tier" default="[0, 0, 1]">
+			SSR on/off per tier [code][low, medium, high][/code].
+		</member>
+		<member name="msaa_per_tier" type="PackedInt32Array" setter="set_msaa_per_tier" getter="get_msaa_per_tier" default="[0, 1, 2]">
+			MSAA per tier: 0 = disabled, 1 = 2x, 2 = 4x, 3 = 8x.
+		</member>
+		<member name="thermal_heat_rate" type="float" setter="set_thermal_heat_rate" getter="get_thermal_heat_rate" default="0.04">
+			Thermal state rise per second at full load. With the default, a phone pinned below target FPS reaches full heat in roughly 25 seconds.
+		</member>
+		<member name="thermal_cool_rate" type="float" setter="set_thermal_cool_rate" getter="get_thermal_cool_rate" default="0.02">
+			Thermal state fall per second while the frame budget is met.
+		</member>
+		<member name="thermal_warning_threshold" type="float" setter="set_thermal_warning_threshold" getter="get_thermal_warning_threshold" default="0.6">
+			Thermal state at which the ceiling starts lowering [method get_effective_max_scale] and [signal thermal_warning] fires.
+		</member>
+	</members>
+	<signals>
+		<signal name="scale_changed">
+			<param index="0" name="scale" type="float" />
+			<description>
+				Emitted whenever the render scale changes.
+			</description>
+		</signal>
+		<signal name="tier_changed">
+			<param index="0" name="tier" type="int" />
+			<description>
+				Emitted when the applied quality tier changes (0 = low, 1 = medium, 2 = high).
+			</description>
+		</signal>
+		<signal name="quality_changed">
+			<param index="0" name="scale" type="float" />
+			<param index="1" name="tier" type="int" />
+			<description>
+				Emitted after a tier change with the current scale and tier.
+			</description>
+		</signal>
+		<signal name="thermal_warning">
+			<param index="0" name="warning" type="bool" />
+			<description>
+				Emitted when the thermal state crosses [member thermal_warning_threshold] ([code]true[/code]) or drops back under it ([code]false[/code]). Use it to show a "thermal mode" indicator or to reduce audio/CPU work too.
+			</description>
+		</signal>
+	</signals>
+	<constants>
+		<constant enum="Upscaler" name="UPSCALER_AUTO" value="0">
+			Uses FSR in this engine (the recommended default).
+		</constant>
+		<constant enum="Upscaler" name="UPSCALER_BILINEAR" value="1">
+			Plain bilinear upscale (cheapest, slightly softer).
+		</constant>
+		<constant enum="Upscaler" name="UPSCALER_FSR" value="2">
+			FidelityFX Super Resolution 1.0.
+		</constant>
+		<constant enum="Upscaler" name="UPSCALER_FSR2" value="3">
+			FidelityFX Super Resolution 2.0 (temporal; best quality, higher cost).
+		</constant>
+		<constant enum="QualityTier" name="TIER_LOW" value="0">
+			Lowest quality tier.
+		</constant>
+		<constant enum="QualityTier" name="TIER_MEDIUM" value="1">
+			Middle quality tier.
+		</constant>
+		<constant enum="QualityTier" name="TIER_HIGH" value="2">
+			Highest quality tier.
+		</constant>
+	</constants>
+</class>

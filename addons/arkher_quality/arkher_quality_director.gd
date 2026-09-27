@@ -228,23 +228,38 @@ func _apply_tier() -> void:
 		env.glow_enabled = _tier_value(glow_per_tier, 0) == 1
 		env.volumetric_fog_enabled = _tier_value(volumetric_per_tier, 0) == 1
 		env.ssr_enabled = _tier_value(ssr_per_tier, 0) == 1
-		env.reflections_enabled = _tier_value(reflections_per_tier, 0) == 1
+		# Godot <= 4.4: reflections_enabled (bool). Fork Arkher 4.8-dev:
+		# reflected_light_source (0 = Background, 1 = Disabled, 2 = Sky).
+		var reflections_on := _tier_value(reflections_per_tier, 0) == 1
+		if "reflections_enabled" in env:
+			env.reflections_enabled = reflections_on
+		elif "reflected_light_source" in env:
+			env.reflected_light_source = 1 if not reflections_on else 0
 	# Sombras: varre as luzes da cena.
 	if get_tree() and get_tree().root:
 		var shadows_on := _tier_value(shadows_enabled_per_tier, 1) == 1
 		var max_dist := _tier_float(shadow_max_distance_per_tier, 100.0)
-		for light in get_tree().root.find_children("", "Light", true, false):
-			var l := light as Light
+		for light in get_tree().root.find_children("", "Light3D", true, false):
+			var l := light as Light3D
 			if l:
-				l.shadow_enabled = shadows_on
-				if shadows_on:
-					l.shadow_max_distance = max_dist
+				# Godot <= 4.4: shadow_enabled/shadow_max_distance.
+				# Fork Arkher 4.8-dev: shadow/distance_fade_shadow.
+				if "shadow_enabled" in l:
+					l.shadow_enabled = shadows_on
+					if shadows_on:
+						l.shadow_max_distance = max_dist
+				else:
+					l.shadow = shadows_on
+					if shadows_on:
+						l.distance_fade_shadow = max_dist
 	# MSAA no viewport raiz.
 	var vp := get_viewport()
 	if vp:
 		var msaa_value := _tier_value(msaa_per_tier, 0)
 		if vp.has_method("set_msaa"):
 			vp.msaa = msaa_value
+		elif vp.has_method("set_msaa_3d"):
+			vp.msaa_3d = msaa_value
 
 # ----------------------------------------------------------------- overlay
 func _build_overlay() -> void:

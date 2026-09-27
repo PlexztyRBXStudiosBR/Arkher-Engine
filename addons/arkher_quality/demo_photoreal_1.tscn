@@ -1,0 +1,128 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://addons/arkher_quality/arkher_quality_director.gd" id="1_director"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.16, 0.3, 0.55, 1)
+sky_horizon_color = Color(0.85, 0.55, 0.35, 1)
+sun_color = Color(1, 0.75, 0.45, 1)
+sun_curve = 0.4
+ground_horizon_color = Color(0.3, 0.22, 0.16, 1)
+ground_bottom_color = Color(0.12, 0.09, 0.07, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="env"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 3
+ambient_light_sky_contribution = 1.0
+tonemap_mode = 4
+ssao_enabled = true
+ssao_radius_scale = 0.6
+ssil_enabled = true
+glow_enabled = true
+glow_intensity = 0.6
+glow_bloom = 0.15
+sdfgi_enabled = true
+sdfgi_bounces = 2
+sdfgi_normal_bias = 0.8
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.012
+volumetric_fog_albedo = Color(0.8, 0.6, 0.4, 1)
+volumetric_fog_glow = 0.1
+reflected_light_source = 0
+ssr_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="mat_ground"]
+albedo_color = Color(0.28, 0.22, 0.16, 1)
+roughness = 0.95
+metallic = 0.0
+
+[sub_resource type="StandardMaterial3D" id="mat_chrome"]
+albedo_color = Color(0.95, 0.95, 0.97, 1)
+metallic = 1.0
+roughness = 0.06
+
+[sub_resource type="StandardMaterial3D" id="mat_ceramic"]
+albedo_color = Color(0.9, 0.55, 0.3, 1)
+metallic = 0.0
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="mat_rock"]
+albedo_color = Color(0.35, 0.33, 0.31, 1)
+metallic = 0.0
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_lamp"]
+albedo_color = Color(1, 0.5, 0.2, 1)
+emission_enabled = true
+emission = Color(1, 0.45, 0.15, 1)
+emission_energy_multiplier = 4.0
+
+[sub_resource type="PlaneMesh" id="mesh_ground"]
+material = SubResource("mat_ground")
+size = Vector2(60, 60)
+
+[sub_resource type="SphereMesh" id="mesh_chrome"]
+material = SubResource("mat_chrome")
+radius = 1.0
+height = 2.0
+
+[sub_resource type="BoxMesh" id="mesh_ceramic"]
+material = SubResource("mat_ceramic")
+size = Vector3(1.6, 1.6, 1.6)
+
+[sub_resource type="SphereMesh" id="mesh_rock"]
+material = SubResource("mat_rock")
+radius = 1.4
+height = 2.8
+
+[sub_resource type="BoxMesh" id="mesh_lamp"]
+material = SubResource("mat_lamp")
+size = Vector3(0.3, 3.0, 0.3)
+
+[node name="Photoreal1" type="Node"]
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 0.45, 0.89, 0, -0.89, 0.45, 0, 10, 0)
+light_color = Color(1, 0.8, 0.6, 1)
+light_energy = 3.0
+shadow_enabled = true
+shadow_max_distance = 80.0
+
+[node name="Camera3D" type="Camera3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 11)
+fov = 55.0
+
+[node name="Ground" type="MeshInstance3D" parent="World"]
+mesh = SubResource("mesh_ground")
+
+[node name="ChromeBall" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("mesh_chrome")
+
+[node name="CeramicCube" type="MeshInstance3D" parent="World"]
+transform = Transform3D(0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0, 0, 1, 3.2, 0.8, -2.5)
+mesh = SubResource("mesh_ceramic")
+
+[node name="Rock" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.5, 0.9, -3)
+mesh = SubResource("mesh_rock")
+
+[node name="Lamp" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5, 1.5, 1)
+mesh = SubResource("mesh_lamp")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("env")
+
+[node name="ArkherQualityDirector" type="Node" parent="."]
+script = ExtResource("1_director")
+target_fps = 60.0
+min_scale = 0.4
+show_debug_overlay = true
+world_environment = NodePath("../WorldEnvironment")

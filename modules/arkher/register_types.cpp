@@ -31,12 +31,14 @@
 #include "register_types.h"
 
 #include "arkher_auto_quality.h"
+#include "arkher_quality_director.h"
 
 #include "core/object/class_db.h"
 
 void initialize_arkher_module(ModuleInitializationLevel p_level) {
 	if (p_level == MODULE_INITIALIZATION_LEVEL_SCENE) {
 		GDREGISTER_CLASS(ArkherAutoQuality);
+		GDREGISTER_CLASS(ArkherQualityDirector);
 	}
 }
 

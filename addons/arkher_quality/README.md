@@ -1,8 +1,17 @@
-# Arkher Quality (addon) — v0.2
+# Arkher Quality (addon) — v0.3
 
 **ArkherQualityDirector** — a base do pilar "fotorreal em qualquer celular".
 Pure GDScript: **não precisa compilar a engine** — funciona no Godot estável
-(4.3/4.4+) E no fork Arkher (4.8-dev).
+(4.3/4.4+) E no fork Arkher (4.8-dev) — com tolerância de versão nas APIs
+que o fork renomeou (`shadow`/`distance_fade_shadow`, `msaa_3d`,
+`reflected_light_source`).
+
+## Demo Photoreal-1 (M2)
+
+`demo_photoreal_1.tscn` — cena de teste do pipeline fotorreal: céu
+procedural (golden hour), AgX, SDFGI, SSAO, SSIL, glow, fog volumétrico,
+SSR e reflexos, com o QualityDirector ajustando tudo sozinho. Abra e dê
+**Play**: o overlay no canto mostra fps/escala/tier em tempo real.
 
 ## O que ele faz
 
@@ -46,12 +55,31 @@ subir; suba para 120 — ela cai.
 5. **Critério do tier Mobile (ROADMAP M2):** a demo segura ≥55fps no A70
    com tier LOW/MED e escala entre 0.4 e 0.7 (720p nativo).
 
-## Limitações da v0.2 (próximos passos)
+## Director nativo (C++, módulo `arkher` — M2)
 
-- Troca de tier reescreve propriedades do `Environment` — ok para 1
-  WorldEnvironment; cenas com vários ambientes exigem a lista de ambientes
-  (M2: `ArkherQualityDirector` em C++ com registro de ambientes).
-- Sombras por varredura de luzes: ok até ~50 luzes; C++ fará via
-  `RenderingServer` em lote.
-- No M2 a versão C++ adiciona: teto térmico (leitura do SO), integração com
-  o futuro renderer Arkher e presets como `Resource` salvos no projeto.
+A versão C++ **`ArkherQualityDirector`** (classe nativa, aparece no editor
+quando a engine Arkher está compilada com o módulo `arkher`) adiciona:
+
+- **Teto térmico (thermal model)**: `thermal_state` (0..1) sobe com a carga
+  sustentada de render e desce quando o FPS atinge o alvo. Acima de
+  `thermal_warning_threshold`, a escala máxima efetiva cai (até 50% de
+  `max_scale` em calor total) e o sinal `thermal_warning` dispara.
+  Este fork não expõe sensor de temperatura/bateria no core (como o Godot
+  4.x), então o modelo é **portátil**: calibre `thermal_heat_rate` por
+  dispositivo — comece conservador no Itel A70 e afrouxe em phones
+  intermediários. Quando o renderer Arkher expuser telemetria real
+  (M4), o modelo passa a ler o sensor de verdade.
+- Mesma lógica de histerese + FSR/FSR2 + tiers (sombras, SDFGI, SSAO, SSIL,
+  glow, volumétrico, SSR, reflexos, MSAA por tier).
+- Sinais: `scale_changed`, `tier_changed`, `quality_changed`,
+  `thermal_warning`.
+
+Uso: adicione um nodo `ArkherQualityDirector` (só existe no build Arkher —
+no Godot estável use a versão GDScript deste addon, que é a mesma lógica).
+
+## Limitações (próximos passos)
+
+- 1 `WorldEnvironment` por director; cenas multi-ambiente: lista de
+  ambientes (M2.5).
+- Presets como `Resource` salvos no projeto (M2.5).
+- Leitura real de sensor térmico/bateria via GDExtension no Android (M4).
