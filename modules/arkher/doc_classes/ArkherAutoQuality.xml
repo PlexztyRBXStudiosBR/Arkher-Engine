@@ -130,8 +130,6 @@
 	</members>
 	<signals>
 		<signal name="quality_changed">
-			
-			
 			<description>
 				Emitted whenever the recommended scale changes. [code]scale[/code] is the continuous recommendation (between [member min_scale] and [member max_scale]) and [code]tier[/code] is the discrete tier (0 = low, 1 = medium, 2 = high).
 			</description>
