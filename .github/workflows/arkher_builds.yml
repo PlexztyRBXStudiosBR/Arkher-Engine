@@ -17,6 +17,7 @@ on:
 env:
   SCONS_FLAGS: >-
     debug_symbols=no
+    accesskit=no
 
 jobs:
   build-arkher-linux:

@@ -34,6 +34,8 @@
 #include "core/object/class_db.h"
 #include "core/os/os.h"
 
+#include "core/math/math_funcs.h"
+
 #include <math.h>
 
 void ArkherAutoQuality::_bind_methods() {
@@ -83,7 +85,7 @@ void ArkherAutoQuality::_process(double p_delta) {
 
 	const float dt = static_cast<float>(p_delta);
 	const float alpha = 1.0f - powf(1.0f - CLAMP(smoothing, 0.001f, 1.0f), dt * 60.0f);
-	ema_fps = ema_fps > 0.0f ? lerpf(ema_fps, fps, alpha) : fps;
+	ema_fps = ema_fps > 0.0f ? Math::lerp(ema_fps, fps, alpha) : fps;
 
 	float scale = max_scale;
 	if (target_fps > 0.0f) {
@@ -98,8 +100,8 @@ void ArkherAutoQuality::_process(double p_delta) {
 
 	scale = CLAMP(scale, min_scale, max_scale);
 
-	if (absf(scale - current_scale) > 0.001f) {
-		current_scale = lerpf(current_scale, scale, MINF(alpha * 0.5f + 0.02f, 1.0f));
+	if (Math::abs(scale - current_scale) > 0.001f) {
+		current_scale = Math::lerp(current_scale, scale, MIN(alpha * 0.5f + 0.02f, 1.0f));
 		_quality_changed();
 	}
 }
@@ -121,7 +123,7 @@ float ArkherAutoQuality::get_target_fps() const {
 }
 
 void ArkherAutoQuality::set_target_fps(float p_target_fps) {
-	target_fps = MAXF(p_target_fps, 1.0f);
+	target_fps = MAX(p_target_fps, 1.0f);
 }
 
 float ArkherAutoQuality::get_min_scale() const {
@@ -130,7 +132,7 @@ float ArkherAutoQuality::get_min_scale() const {
 
 void ArkherAutoQuality::set_min_scale(float p_min_scale) {
 	min_scale = CLAMP(p_min_scale, 0.1f, 1.0f);
-	min_scale = MINF(min_scale, max_scale);
+	min_scale = MIN(min_scale, max_scale);
 }
 
 float ArkherAutoQuality::get_max_scale() const {
@@ -139,7 +141,7 @@ float ArkherAutoQuality::get_max_scale() const {
 
 void ArkherAutoQuality::set_max_scale(float p_max_scale) {
 	max_scale = CLAMP(p_max_scale, 0.1f, 2.0f);
-	max_scale = MAXF(max_scale, min_scale);
+	max_scale = MAX(max_scale, min_scale);
 }
 
 float ArkherAutoQuality::get_smoothing() const {
