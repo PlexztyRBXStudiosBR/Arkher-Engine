@@ -1,0 +1,93 @@
+# Builds the Arkher Engine (Linux editor) and publishes the binary as a
+# downloadable artifact.
+#
+# How to use (from GitHub): Actions -> "Arkher Builds" -> "Run workflow"
+# (or it runs on every push to master and arena/* branches).
+# When the job finishes: "Arkher Linux Editor" appears under "Artifacts" —
+# download it, chmod +x, and run.
+name: 🏔 Arkher Builds
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - "arena/**"
+
+env:
+  SCONS_FLAGS: >-
+    debug_symbols=no
+
+jobs:
+  build-arkher-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libwayland-bin
+
+      - name: Restore Arkher build cache
+        uses: ./.github/actions/godot-cache-restore
+        with:
+          cache-name: arkher-linux-editor
+        continue-on-error: true
+
+      - name: Setup Python and SCons
+        uses: ./.github/actions/godot-deps
+
+      - name: Compilation
+        uses: ./.github/actions/godot-build
+        with:
+          scons-flags: ${{ env.SCONS_FLAGS }}
+          platform: linuxbsd
+          target: editor
+
+      - name: Save Arkher build cache
+        uses: ./.github/actions/godot-cache-save
+        with:
+          cache-name: arkher-linux-editor
+        continue-on-error: true
+
+      - name: Package Arkher binary
+        run: |
+          strip bin/godot.linuxbsd.editor.x86_64
+          mv bin/godot.linuxbsd.editor.x86_64 bin/arkher.linuxbsd.editor.x86_64
+          chmod +x bin/arkher.linuxbsd.editor.x86_64
+          mkdir -p ./arkher-release
+          cp bin/arkher.linuxbsd.editor.x86_64 ./arkher-release/
+          cat > ./arkher-release/LEIA-ME.txt <<'EOF'
+          Arkher Engine (derivative of Godot Engine, MIT)
+          ===============================================
+
+          1. chmod +x arkher.linuxbsd.editor.x86_64
+          2. ./arkher.linuxbsd.editor.x86_64
+
+          O editor abre o Project Manager. Configs ficam em ~/.config/arkher
+          (separadas do Godot, para nunca pisar em seu setup atual).
+
+          Ative os addons ArkherTerrain e ArkherQuality em:
+          Project Settings -> Plugins
+          EOF
+
+      - name: Identity check
+        run: |
+          # The banner MUST say "Arkher Engine" (Godot attribution stays in
+          # the copyright lines right below it — that is the 5% rule).
+          bin/arkher.linuxbsd.editor.x86_64 --help | head -5
+          bin/arkher.linuxbsd.editor.x86_64 --help | head -5 | grep -q "Arkher Engine" || {
+            echo "::error::Banner does not say 'Arkher Engine' — rebrand broken."
+            exit 1
+          }
+
+      - name: Upload artifact
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: arkher-linux-editor
+          path: arkher-release/

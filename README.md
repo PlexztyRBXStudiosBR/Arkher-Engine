@@ -1,8 +1,24 @@
+# Arkher Engine
+
+> **Este repositório é a Arkher Engine** — engine derivada do Godot Engine
+> (MIT), pela PlexztyRBX Studios: fotorrealismo em qualquer celular, o melhor
+> editor de terreno, animação melhor que mocap e física de alto nível, 95%
+> customizável.
+>
+> - 📋 [ROADMAP.md](ROADMAP.md) — plano técnico por pilar e marcos
+> - ⚙️ [ARKHER.md](ARKHER.md) — identidade, estrutura, como compilar, licença
+> - 🌄 [addons/arkher_terrain/](addons/arkher_terrain/README.md) — editor de terreno (v0.1 funcional)
+> - ⚙️ [modules/arkher/](modules/arkher/) — primeiro módulo C++ da engine
+> - 🎚 [addons/arkher_quality/](addons/arkher_quality/README.md) — QualityDirector: resolução dinâmica + FSR + tiers (v0.2, roda sem compilar)
+> - 🖥 **CI do editor** — workflow "Arkher Builds" (GitHub Actions) compila o binário Linux do Arkher Editor com artefato para download
+
+---
+
 # Godot Engine
 
 <p align="center">
   <a href="https://godotengine.org">
-    <img src="misc/logo/logo_outlined.svg" width="400" alt="Godot Engine logo">
+    <img src="misc/logo/logo_outlined.svg" width="400" alt="Arkher Engine logo">
   </a>
 </p>
 
