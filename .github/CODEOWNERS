@@ -298,3 +298,9 @@
 *.py                                          @godotengine/buildsystem
 SConstruct                                    @godotengine/buildsystem
 SCsub                                         @godotengine/buildsystem
+
+# Arkher Engine (PlexztyRBX Studios) — fork additions
+
+/addons/arkher_terrain/                        @PlexztyRBXStudiosBR
+/addons/arkher_quality/                        @PlexztyRBXStudiosBR
+/modules/arkher/                               @PlexztyRBXStudiosBR
