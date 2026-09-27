@@ -17,119 +17,92 @@
 	<tutorials>
 	</tutorials>
 	<methods>
-		<method name="get_consider_low_processor_usage_mode" return="bool">
-			<returnvalue type="bool">
-			</returnvalue>
+		<method name="get_consider_low_processor_usage_mode">
+			<return type="bool" />
 			<description>
 				Returns whether low-processor-usage-mode (power saving) forces the recommended scale toward [member min_scale].
 			</description>
 		</method>
-		<method name="get_current_scale" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_current_scale">
+			<return type="float" />
 			<description>
 				Returns the currently recommended rendering quality scale, between [member min_scale] and [member max_scale].
 			</description>
 		</method>
-		<method name="get_max_scale" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_max_scale">
+			<return type="float" />
 			<description>
 				Returns the upper bound of the recommended scale (default 1.0).
 			</description>
 		</method>
-		<method name="get_measured_fps" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_measured_fps">
+			<return type="float" />
 			<description>
 				Returns the exponential moving average of measured frames per second (0 before the first frame).
 			</description>
 		</method>
-		<method name="get_min_scale" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_min_scale">
+			<return type="float" />
 			<description>
 				Returns the lower bound of the recommended scale (default 0.5).
 			</description>
 		</method>
-		<method name="get_smoothing" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_smoothing">
+			<return type="float" />
 			<description>
 				Returns the smoothing factor (0..1) applied to the measured FPS before computing the scale.
 			</description>
 		</method>
-		<method name="get_target_fps" return="float">
-			<returnvalue type="float">
-			</returnvalue>
+		<method name="get_target_fps">
+			<return type="float" />
 			<description>
 				Returns the target frames per second the device should hold (default 60).
 			</description>
 		</method>
-		<method name="get_tier" return="int">
-			<returnvalue type="int">
-			</returnvalue>
+		<method name="get_tier">
+			<return type="int" />
 			<description>
 				Returns the discrete quality tier derived from [method get_current_scale]: 0 = low (scale &lt; 0.65), 1 = medium (0.65..0.85), 2 = high (&gt;= 0.85).
 			</description>
 		</method>
-		<method name="is_enabled" return="bool">
-			<returnvalue type="bool">
-			</returnvalue>
+		<method name="is_enabled">
+			<return type="bool" />
 			<description>
 				Returns whether the node is actively measuring and emitting [signal quality_changed].
 			</description>
 		</method>
-		<method name="set_consider_low_processor_usage_mode" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="true" name="consider" type="bool">
-			</param>
+		<method name="set_consider_low_processor_usage_mode" qualifiers="set">
+			<param index="0" name="consider" type="bool" default="true" />
 			<description>
 				Sets whether low-processor-usage-mode (power saving) forces the recommended scale toward [member min_scale].
 			</description>
 		</method>
-		<method name="set_enabled" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="true" name="enabled" type="bool">
-			</param>
+		<method name="set_enabled" qualifiers="set">
+			<param index="0" name="enabled" type="bool" default="true" />
 			<description>
 				Sets whether the node is actively measuring and emitting [signal quality_changed].
 			</description>
 		</method>
-		<method name="set_max_scale" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="1.0" name="scale" type="float">
-			</param>
+		<method name="set_max_scale" qualifiers="set">
+			<param index="0" name="scale" type="float" default="1.0" />
 			<description>
 				Sets the upper bound of the recommended scale.
 			</description>
 		</method>
-		<method name="set_min_scale" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="0.5" name="scale" type="float">
-			</param>
+		<method name="set_min_scale" qualifiers="set">
+			<param index="0" name="scale" type="float" default="0.5" />
 			<description>
 				Sets the lower bound of the recommended scale.
 			</description>
 		</method>
-		<method name="set_smoothing" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="0.1" name="smoothing" type="float">
-			</param>
+		<method name="set_smoothing" qualifiers="set">
+			<param index="0" name="smoothing" type="float" default="0.1" />
 			<description>
 				Sets the smoothing factor (0..1) applied to the measured FPS.
 			</description>
 		</method>
-		<method name="set_target_fps" qualifier="set">
-			<returnvalue type="void">
-			</returnvalue>
-			<param default="60.0" name="fps" type="float">
-			</param>
+		<method name="set_target_fps" qualifiers="set">
+			<param index="0" name="fps" type="float" default="60.0" />
 			<description>
 				Sets the target frames per second the device should hold.
 			</description>
@@ -157,10 +130,8 @@
 	</members>
 	<signals>
 		<signal name="quality_changed">
-			<param type="float" name="scale">
-			</param>
-			<param type="int" name="tier">
-			</param>
+			
+			
 			<description>
 				Emitted whenever the recommended scale changes. [code]scale[/code] is the continuous recommendation (between [member min_scale] and [member max_scale]) and [code]tier[/code] is the discrete tier (0 = low, 1 = medium, 2 = high).
 			</description>
