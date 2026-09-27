@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://addons/arkher_quality/arkher_quality_director.gd" id="1_director"]
 
@@ -20,18 +20,17 @@ ambient_light_source = 3
 ambient_light_sky_contribution = 1.0
 tonemap_mode = 4
 ssao_enabled = true
-ssao_radius_scale = 0.6
+ssao_radius = 0.6
 ssil_enabled = true
 glow_enabled = true
 glow_intensity = 0.6
 glow_bloom = 0.15
 sdfgi_enabled = true
-sdfgi_bounces = 2
+sdfgi_cascades = 2
 sdfgi_normal_bias = 0.8
 volumetric_fog_enabled = true
 volumetric_fog_density = 0.012
 volumetric_fog_albedo = Color(0.8, 0.6, 0.4, 1)
-volumetric_fog_glow = 0.1
 reflected_light_source = 0
 ssr_enabled = true
 
@@ -92,7 +91,7 @@ transform = Transform3D(1, 0, 0, 0, 0.45, 0.89, 0, -0.89, 0.45, 0, 10, 0)
 light_color = Color(1, 0.8, 0.6, 1)
 light_energy = 3.0
 shadow_enabled = true
-shadow_max_distance = 80.0
+distance_fade_shadow = 80.0
 
 [node name="Camera3D" type="Camera3D" parent="World"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 11)
