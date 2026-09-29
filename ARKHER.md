@@ -103,7 +103,8 @@ O módulo `arkher` e todos os addons compilam sozinhos — módulos Godot em
 | Módulo C++ `arkher` (ArkherAutoQuality) | ✅ v0.1 |
 | Editor de terreno `arkher_terrain` | ✅ v0.1 (escultura, 4 materiais, ruído, erosão) |
 | QualityDirector `arkher_quality` | ✅ v0.3 (resolução dinâmica + FSR/FSR2 + tiers, GDScript, roda sem compilar, compat. Godot estável E fork) |
-| QualityDirector C++ `ArkherQualityDirector` (M2) | ✅ v1 no módulo `arkher` (teto térmico + histerese + FSR2 + per-tier + sinais) |
+| QualityDirector C++ `ArkherQualityDirector` (M2) | ✅ v1 no módulo `arkher` (teto térmico + histerese + FSR2 + per-tier + sinais + multi-ambiente) |
+| Presets por dispositivo (M2.5) | ✅ `ArkherQualityPreset` (nativa) + `ArkherQualityProfile` (script) + perfis `profile_a70.tres`/`profile_top.tres` |
 | Demo Photoreal-1 (M2) | ✅ `addons/arkher_quality/demo_photoreal_1.tscn` (golden hour, AgX, SDFGI, SSAO, SSIL, glow, fog, SSR, reflexos) |
 | Rebrand "Arkher Engine" (M1) | ✅ short_name, ícones do editor, logo, About, banner, `short_name` do build |
 | CI do editor (M1) | ✅ workflow "Arkher Builds" → binário Linux com artefato (a validar no primeiro run) |

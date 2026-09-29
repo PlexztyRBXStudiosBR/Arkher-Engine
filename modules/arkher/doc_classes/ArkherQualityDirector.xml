@@ -6,10 +6,18 @@
 	<description>
 		Arkher pillar 1 ("photoreal on any phone"), native version. Unlike [ArkherAutoQuality] (which only recommends), this director applies the changes: it drives the root [Window]'s content scale (dynamic resolution), selects the upscaler ([constant UPSCALER_AUTO] uses FSR) and applies per-tier settings (shadows, SDFGI, SSAO, SSIL, glow, volumetric fog, SSR, reflections, MSAA) to [member world_environment] and every [Light3D] in the scene.
 		[b]Thermal model ("teto térmico"):[/b] [method get_thermal_state] rises with sustained rendering load and falls while the frame budget is met. When it crosses [member thermal_warning_threshold], the effective max scale is lowered (down to 50% of [member max_scale] at full heat) and the [signal thermal_warning] signal is emitted. Tune [member thermal_heat_rate] per device — start conservative on the Itel A70 (the Arkher mobile floor) and loosen on mid/high phones.
+		[b]Presets:[/b] save one [ArkherQualityPreset] per target device (e.g. [code]presets/a70.tres[/code]) and load it with [method apply_preset]. In stable Godot builds, the equivalent is the script-based [code]ArkherQualityProfile[/code] from the [code]arkher_quality[/code] addon.
 	</description>
 	<tutorials>
 	</tutorials>
 	<methods>
+		<method name="apply_preset">
+			<return type="void" />
+			<param index="0" name="preset" type="ArkherQualityPreset" />
+			<description>
+				Loads a saved quality profile (per-device calibration) and applies it immediately: target FPS, scale bounds, upscaler, the per-tier arrays and the thermal rates. The current scale is clamped into the new bounds.
+			</description>
+		</method>
 		<method name="get_current_scale" qualifiers="const">
 			<return type="float" />
 			<description>
@@ -70,13 +78,16 @@
 			When the window's content scale mode is still disabled, the director configures it (viewport mode) so its scale actually applies to 3D.
 		</member>
 		<member name="world_environment" type="NodePath" setter="set_world_environment" getter="get_world_environment">
-			The [WorldEnvironment] whose [Environment] effects are toggled per tier. Leave empty to only manage scale, lights and MSAA.
+			The [WorldEnvironment] whose [Environment] effects are toggled per tier. When empty, the director auto-discovers [b]every[/b] [WorldEnvironment] in the scene and applies the tier to all of them (multi-environment scenes).
 		</member>
 		<member name="shadows_per_tier" type="PackedInt32Array" setter="set_shadows_per_tier" getter="get_shadows_per_tier" default="[0, 1, 1]">
 			Shadows on/off per tier [code][low, medium, high][/code], applied to every [Light3D] in the scene.
 		</member>
 		<member name="shadow_distance_per_tier" type="PackedFloat32Array" setter="set_shadow_distance_per_tier" getter="get_shadow_distance_per_tier" default="[30.0, 60.0, 100.0]">
 			Shadow fade distance per tier [code][low, medium, high][/code].
+		</member>
+		<member name="reflections_per_tier" type="PackedInt32Array" setter="set_reflections_per_tier" getter="get_reflections_per_tier" default="[0, 1, 1]">
+			Environment reflections on/off per tier [code][low, medium, high][/code] (0 = disabled, 1 = reflections from background).
 		</member>
 		<member name="sdfgi_per_tier" type="PackedInt32Array" setter="set_sdfgi_per_tier" getter="get_sdfgi_per_tier" default="[0, 0, 1]">
 			SDFGI on/off per tier [code][low, medium, high][/code].

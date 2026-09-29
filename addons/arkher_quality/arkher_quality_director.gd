@@ -217,11 +217,39 @@ func _tier_float(arr: PackedFloat32Array, default_value: float) -> float:
 		return float(arr[_tier])
 	return default_value
 
+## Carrega um perfil de qualidade (ex.: ArkherQualityProfile) e aplica na
+## hora. Copia apenas as propriedades que existem nos dois lados (duck typing).
+func apply_preset(preset: Resource) -> void:
+	if preset == null:
+		return
+	var props := [
+		"target_fps", "min_scale", "max_scale", "fsr_sharpness",
+		"shadows_enabled_per_tier", "shadow_max_distance_per_tier",
+		"sdfgi_per_tier", "ssao_per_tier", "ssil_per_tier", "glow_per_tier",
+		"volumetric_per_tier", "ssr_per_tier", "reflections_per_tier",
+		"msaa_per_tier",
+	]
+	for p in props:
+		if p in preset and p in self:
+			set(p, preset.get(p))
+	_scale = clampf(_scale, min_scale, max_scale)
+	_ensure_scale_mode()
+	_ensure_fsr()
+	_apply_scale()
+	_check_tier()
+
 func _apply_tier() -> void:
-	var env: Environment = null
-	if world_environment:
-		env = world_environment.environment
-	if env:
+	# Ambiente(s): o world_environment explícito, ou TODOS os
+	# WorldEnvironment da cena (auto-descoberta — multi-ambiente).
+	var envs: Array[Environment] = []
+	if world_environment != null and world_environment.environment:
+		envs.append(world_environment.environment)
+	elif get_tree() and get_tree().root:
+		for node in get_tree().root.find_children("", "WorldEnvironment", true, false):
+			var we := node as WorldEnvironment
+			if we != null and we.environment:
+				envs.append(we.environment)
+	for env in envs:
 		env.sdfgi_enabled = _tier_value(sdfgi_per_tier, 0) == 1
 		env.ssao_enabled = _tier_value(ssao_per_tier, 0) == 1
 		env.ssil_enabled = _tier_value(ssil_per_tier, 0) == 1

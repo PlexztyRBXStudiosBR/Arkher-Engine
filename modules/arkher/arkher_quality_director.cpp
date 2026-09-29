@@ -30,6 +30,8 @@
 
 #include "arkher_quality_director.h"
 
+#include "arkher_quality_preset.h"
+
 #include "core/config/engine.h"
 #include "core/math/math_funcs.h"
 #include "core/object/class_db.h"
@@ -84,6 +86,9 @@ void ArkherQualityDirector::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_shadow_distance_per_tier", "values"), &ArkherQualityDirector::set_shadow_distance_per_tier);
 	ClassDB::bind_method(D_METHOD("get_shadow_distance_per_tier"), &ArkherQualityDirector::get_shadow_distance_per_tier);
 
+	ClassDB::bind_method(D_METHOD("set_reflections_per_tier", "values"), &ArkherQualityDirector::set_reflections_per_tier);
+	ClassDB::bind_method(D_METHOD("get_reflections_per_tier"), &ArkherQualityDirector::get_reflections_per_tier);
+
 	ClassDB::bind_method(D_METHOD("set_sdfgi_per_tier", "values"), &ArkherQualityDirector::set_sdfgi_per_tier);
 	ClassDB::bind_method(D_METHOD("get_sdfgi_per_tier"), &ArkherQualityDirector::get_sdfgi_per_tier);
 
@@ -119,6 +124,8 @@ void ArkherQualityDirector::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_current_scale"), &ArkherQualityDirector::get_current_scale);
 	ClassDB::bind_method(D_METHOD("get_current_tier"), &ArkherQualityDirector::get_current_tier);
 
+	ClassDB::bind_method(D_METHOD("apply_preset", "preset"), &ArkherQualityDirector::apply_preset);
+
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enabled"), "set_enabled", "is_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "target_fps", PROPERTY_HINT_RANGE, "1,240,0.1"), "set_target_fps", "get_target_fps");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_scale", PROPERTY_HINT_RANGE, "0.1,1,0.01"), "set_min_scale", "get_min_scale");
@@ -133,6 +140,7 @@ void ArkherQualityDirector::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::NODE_PATH, "world_environment"), "set_world_environment", "get_world_environment");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "shadows_per_tier"), "set_shadows_per_tier", "get_shadows_per_tier");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_FLOAT32_ARRAY, "shadow_distance_per_tier"), "set_shadow_distance_per_tier", "get_shadow_distance_per_tier");
+	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "reflections_per_tier"), "set_reflections_per_tier", "get_reflections_per_tier");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "sdfgi_per_tier"), "set_sdfgi_per_tier", "get_sdfgi_per_tier");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "ssao_per_tier"), "set_ssao_per_tier", "get_ssao_per_tier");
 	ADD_PROPERTY(PropertyInfo(Variant::PACKED_INT32_ARRAY, "ssil_per_tier"), "set_ssil_per_tier", "get_ssil_per_tier");
@@ -227,19 +235,6 @@ double ArkherQualityDirector::_thermal_ceiling() const {
 }
 
 void ArkherQualityDirector::_apply_tier() {
-	if (world_environment) {
-		Ref<Environment> env = world_environment->get_environment();
-		if (env.is_valid()) {
-			env->set_sdfgi_enabled(_tier_value(sdfgi_per_tier, 0) == 1);
-			env->set_ssao_enabled(_tier_value(ssao_per_tier, 0) == 1);
-			env->set_ssil_enabled(_tier_value(ssil_per_tier, 0) == 1);
-			env->set_glow_enabled(_tier_value(glow_per_tier, 0) == 1);
-			env->set_volumetric_fog_enabled(_tier_value(volumetric_per_tier, 0) == 1);
-			env->set_ssr_enabled(_tier_value(ssr_per_tier, 0) == 1);
-			env->set_reflection_source(current_tier == TIER_LOW ? Environment::REFLECTION_SOURCE_DISABLED : Environment::REFLECTION_SOURCE_BG);
-		}
-	}
-
 	const SceneTree *tree = get_tree();
 	if (tree == nullptr) {
 		return;
@@ -247,6 +242,33 @@ void ArkherQualityDirector::_apply_tier() {
 	Window *root = static_cast<Window *>(tree->get_root());
 	if (root == nullptr) {
 		return;
+	}
+
+	// Target environments: the explicit world_environment when set, otherwise
+	// every WorldEnvironment node in the scene (auto-discovery, multi-env).
+	Vector<WorldEnvironment *> environments;
+	if (world_environment_path.is_empty()) {
+		const TypedArray<Node> found = root->find_children("", "WorldEnvironment", true, false);
+		for (int i = 0; i < found.size(); i++) {
+			WorldEnvironment *we = Object::cast_to<WorldEnvironment>(found[i]);
+			if (we != nullptr) {
+				environments.push_back(we);
+			}
+		}
+	} else if (world_environment != nullptr) {
+		environments.push_back(world_environment);
+	}
+	for (int i = 0; i < environments.size(); i++) {
+		Ref<Environment> env = environments[i]->get_environment();
+		if (env.is_valid()) {
+			env->set_sdfgi_enabled(_tier_value(sdfgi_per_tier, 0) == 1);
+			env->set_ssao_enabled(_tier_value(ssao_per_tier, 0) == 1);
+			env->set_ssil_enabled(_tier_value(ssil_per_tier, 0) == 1);
+			env->set_glow_enabled(_tier_value(glow_per_tier, 0) == 1);
+			env->set_volumetric_fog_enabled(_tier_value(volumetric_per_tier, 0) == 1);
+			env->set_ssr_enabled(_tier_value(ssr_per_tier, 0) == 1);
+			env->set_reflection_source(_tier_value(reflections_per_tier, 0) == 1 ? Environment::REFLECTION_SOURCE_BG : Environment::REFLECTION_SOURCE_DISABLED);
+		}
 	}
 
 	const bool shadows_on = _tier_value(shadows_per_tier, 1) == 1;
@@ -484,6 +506,47 @@ void ArkherQualityDirector::set_shadow_distance_per_tier(const PackedFloat32Arra
 
 PackedFloat32Array ArkherQualityDirector::get_shadow_distance_per_tier() const {
 	return shadow_distance_per_tier;
+}
+
+void ArkherQualityDirector::set_reflections_per_tier(const PackedInt32Array &p_values) {
+	reflections_per_tier = p_values;
+}
+
+PackedInt32Array ArkherQualityDirector::get_reflections_per_tier() const {
+	return reflections_per_tier;
+}
+
+void ArkherQualityDirector::apply_preset(const Ref<ArkherQualityPreset> &p_preset) {
+	if (p_preset.is_null()) {
+		return;
+	}
+	target_fps = MAX(p_preset->get_target_fps(), 1.0);
+	min_scale = CLAMP(p_preset->get_min_scale(), 0.1, 1.0);
+	min_scale = MIN(min_scale, max_scale);
+	max_scale = CLAMP(p_preset->get_max_scale(), 0.1, 2.0);
+	max_scale = MAX(max_scale, min_scale);
+	upscaler = p_preset->get_upscaler();
+	fsr_sharpness = CLAMP(p_preset->get_fsr_sharpness(), 0.0, 1.0);
+	shadows_per_tier = p_preset->get_shadows_per_tier();
+	shadow_distance_per_tier = p_preset->get_shadow_distance_per_tier();
+	reflections_per_tier = p_preset->get_reflections_per_tier();
+	sdfgi_per_tier = p_preset->get_sdfgi_per_tier();
+	ssao_per_tier = p_preset->get_ssao_per_tier();
+	ssil_per_tier = p_preset->get_ssil_per_tier();
+	glow_per_tier = p_preset->get_glow_per_tier();
+	volumetric_per_tier = p_preset->get_volumetric_per_tier();
+	ssr_per_tier = p_preset->get_ssr_per_tier();
+	thermal_heat_rate = CLAMP(p_preset->get_thermal_heat_rate(), 0.001, 0.5);
+	thermal_cool_rate = CLAMP(p_preset->get_thermal_cool_rate(), 0.001, 0.5);
+	thermal_warning_threshold = CLAMP(p_preset->get_thermal_warning_threshold(), 0.1, 0.95);
+
+	// Keep the current scale inside the new bounds, then re-apply everything.
+	current_scale = CLAMP(current_scale, min_scale, max_scale);
+	if (is_inside_tree()) {
+		_configure_upscaler();
+		_apply_scale();
+		_check_tier(max_scale * _thermal_ceiling());
+	}
 }
 
 void ArkherQualityDirector::set_sdfgi_per_tier(const PackedInt32Array &p_values) {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class name="ArkherQualityPreset" inherits="Resource" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../class.xsd">
+	<brief_description>
+		A saved quality profile for [ArkherQualityDirector] — one per target device.
+	</brief_description>
+	<description>
+		A [Resource] holding a complete quality calibration: target FPS, dynamic-resolution
+		bounds, upscaler, the per-tier rendering arrays and the thermal-ceiling rates of the
+		[ArkherQualityDirector].
+		Create one preset per target device (e.g. [code]presets/a70.tres[/code] for the Itel A70,
+		[code]presets/top.tres[/code] for a flagship) and load it at runtime with
+		[method ArkherQualityDirector.apply_preset]. This is how a solo dev calibrates the
+		Arkher pillar 1 ("photoreal on any phone") without hardcoding per-device values.
+		In stable Godot builds (no Arkher module), the equivalent script-based class is
+		[code]ArkherQualityProfile[/code] from the [code]arkher_quality[/code] addon.
+	</description>
+	<tutorials>
+	</tutorials>
+	<members>
+		<member name="target_fps" type="float" setter="set_target_fps" getter="get_target_fps" default="60.0">Target frames per second. The director lowers the render scale until this FPS is sustained.</member>
+		<member name="min_scale" type="float" setter="set_min_scale" getter="get_min_scale" default="0.4">Minimum render scale (0.4 = 40% of the resolution).</member>
+		<member name="max_scale" type="float" setter="set_max_scale" getter="get_max_scale" default="1.0">Maximum render scale. On a floor-tier device (e.g. the Itel A70) keep this below 1.0 — the phone should not even try to render at full resolution.</member>
+		<member name="upscaler" type="int" enum="ArkherQualityDirector.Upscaler" setter="set_upscaler" getter="get_upscaler" default="0">Up-scaling filter used to restore the screen resolution. [constant ArkherQualityDirector.UPSCALER_AUTO] picks FSR in the Arkher engine.</member>
+		<member name="fsr_sharpness" type="float" setter="set_fsr_sharpness" getter="get_fsr_sharpness" default="0.2">FSR sharpness (0 = smooth, 1 = sharper). Only used when the upscaler is FSR or FSR2.</member>
+		<member name="shadows_per_tier" type="PackedInt32Array" setter="set_shadows_per_tier" getter="get_shadows_per_tier">Shadow on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="shadow_distance_per_tier" type="PackedFloat32Array" setter="set_shadow_distance_per_tier" getter="get_shadow_distance_per_tier">Maximum shadow distance in meters per tier [code][low, medium, high][/code].</member>
+		<member name="reflections_per_tier" type="PackedInt32Array" setter="set_reflections_per_tier" getter="get_reflections_per_tier">Environment reflections (planar/SDF) on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="sdfgi_per_tier" type="PackedInt32Array" setter="set_sdfgi_per_tier" getter="get_sdfgi_per_tier">SDFGI on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="ssao_per_tier" type="PackedInt32Array" setter="set_ssao_per_tier" getter="get_ssao_per_tier">SSAO on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="ssil_per_tier" type="PackedInt32Array" setter="set_ssil_per_tier" getter="get_ssil_per_tier">SSIL on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="glow_per_tier" type="PackedInt32Array" setter="set_glow_per_tier" getter="get_glow_per_tier">Glow on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="volumetric_per_tier" type="PackedInt32Array" setter="set_volumetric_per_tier" getter="get_volumetric_per_tier">Volumetric fog on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="ssr_per_tier" type="PackedInt32Array" setter="set_ssr_per_tier" getter="get_ssr_per_tier">SSR on/off per tier [code][low, medium, high][/code] (0 = off, 1 = on).</member>
+		<member name="thermal_heat_rate" type="float" setter="set_thermal_heat_rate" getter="get_thermal_heat_rate" default="0.04">How fast the director's thermal state rises under sustained load (per second, 0..1 scale). Calibrate per device: lower for phones with weak coolers (e.g. the Itel A70), higher for flagships.</member>
+		<member name="thermal_cool_rate" type="float" setter="set_thermal_cool_rate" getter="get_thermal_cool_rate" default="0.02">How fast the thermal state falls when the frame budget is met (per second, 0..1 scale).</member>
+		<member name="thermal_warning_threshold" type="float" setter="set_thermal_warning_threshold" getter="get_thermal_warning_threshold" default="0.6">Thermal state at which the effective max scale starts being lowered (0..1). At full heat the max scale is halved.</member>
+	</members>
+</class>

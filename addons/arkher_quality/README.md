@@ -32,10 +32,36 @@ SSR e reflexos, com o QualityDirector ajustando tudo sozinho. Abra e dê
 
 1. Ative o plugin **ArkherQuality** (Project Settings → Plugins).
 2. Adicione um nodo **ArkherQualityDirector** na cena raiz.
-3. Selecione o `WorldEnvironment` do jogo na propriedade `world_environment`.
+3. Selecione o `WorldEnvironment` do jogo na propriedade `world_environment` —
+   **ou deixe em branco**: o diretor auto-descobre TODOS os
+   `WorldEnvironment` da cena e aplica o tier a todos (cenas multi-ambiente).
 4. Ajuste `target_fps` (ex.: 60), `min_scale` (ex.: 0.4).
 5. Pronto. Sinais: `scale_changed(scale)`, `tier_changed(tier)`,
    `quality_changed(scale, tier)`.
+
+## Presets / perfis por dispositivo (M2.5)
+
+Um perfil salva a calibração completa de um dispositivo — é assim que o
+pilar "fotorreal em qualquer celular" é calibrado sem código:
+
+| Engine | Classe do perfil | Onde |
+|--------|------------------|------|
+| Build Arkher (C++) | `ArkherQualityPreset` (nativa, com taxas de teto térmico) | módulo `arkher` |
+| Godot estável / fork | `ArkherQualityProfile` (script, sem térmico) | este addon |
+
+Perfis prontos em `presets/`:
+- `profile_a70.tres` — **Itel A70** (piso): 60fps, escala máx. 0.8,
+  SDFGI/volumétrico/SSR desligados, sombras só em tier med/high, sem MSAA.
+- `profile_top.tres` — topo (120fps, tudo ligado, MSAA 4x em tier med/high).
+
+Uso:
+```gdscript
+director.apply_preset(load("res://addons/arkher_quality/presets/profile_a70.tres"))
+# no build Arkher (C++): director.apply_preset(load("res://presets/a70.tres"))
+```
+Duck-typing: só as propriedades que existem nos dois lados são copiadas —
+um perfil `ArkherQualityProfile` funciona no GDScript diretor nos dois
+engines.
 
 ## Teste rápido no PC
 
@@ -71,6 +97,10 @@ quando a engine Arkher está compilada com o módulo `arkher`) adiciona:
   (M4), o modelo passa a ler o sensor de verdade.
 - Mesma lógica de histerese + FSR/FSR2 + tiers (sombras, SDFGI, SSAO, SSIL,
   glow, volumétrico, SSR, reflexos, MSAA por tier).
+- **Multi-ambiente**: `world_environment` vazio = auto-descobre todos os
+  `WorldEnvironment` da cena.
+- **`apply_preset(ArkherQualityPreset)`**: carrega a calibração de um
+  dispositivo na hora (ver seção "Presets" acima).
 - Sinais: `scale_changed`, `tier_changed`, `quality_changed`,
   `thermal_warning`.
 
@@ -79,7 +109,7 @@ no Godot estável use a versão GDScript deste addon, que é a mesma lógica).
 
 ## Limitações (próximos passos)
 
-- 1 `WorldEnvironment` por director; cenas multi-ambiente: lista de
-  ambientes (M2.5).
-- Presets como `Resource` salvos no projeto (M2.5).
-- Leitura real de sensor térmico/bateria via GDExtension no Android (M4).
+- Leitura real de sensor térmico/bateria via GDExtension no Android (M4) —
+  até lá o teto térmico usa o modelo de calor calibrável.
+- O perfil script (`ArkherQualityProfile`) não tem taxas térmicas (recurso
+  do diretor C++); no build Arkher use o `ArkherQualityPreset` nativo.
