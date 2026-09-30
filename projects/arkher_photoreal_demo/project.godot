@@ -1,0 +1,29 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+
+config_version=5
+
+[application]
+
+config/name="Arkher Photoreal Demo"
+config/description="Demo M2: pipeline fotorreal + ArkherQualityDirector (teto térmico, presets, multi-ambiente). Aberta no editor Arkher (fork) E no Godot estável 4.3+."
+run/main_scene="res://demo_photoreal_1.tscn"
+config/features=PackedStringArray("4.3", "Forward Plus")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/handheld/orientation=0
+window/stretch/mode="disabled"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/arkher_quality")
+
+[rendering]
+
+renderer/rendering_method="forward_plus"
+renderer/rendering_method.mobile="forward_plus"

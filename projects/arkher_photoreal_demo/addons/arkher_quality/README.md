@@ -36,14 +36,8 @@ SSR e reflexos, com o QualityDirector ajustando tudo sozinho. Abra e dê
    **ou deixe em branco**: o diretor auto-descobre TODOS os
    `WorldEnvironment` da cena e aplica o tier a todos (cenas multi-ambiente).
 4. Ajuste `target_fps` (ex.: 60), `min_scale` (ex.: 0.4).
-5. (Opcional) Arraste um perfil para `startup_preset` — ex.:
-   `presets/profile_a70.tres` para o piso.
-6. Pronto. Sinais: `scale_changed(scale)`, `tier_changed(tier)`,
+5. Pronto. Sinais: `scale_changed(scale)`, `tier_changed(tier)`,
    `quality_changed(scale, tier)`.
-
-> **Projeto pronto para testar:** `projects/arkher_photoreal_demo/` na raiz
-> do repo — abra no editor Arkher e faça o teste no A70 (5 passos no
-> README dele, com preset Android arm64 + one-click deploy).
 
 ## Presets / perfis por dispositivo (M2.5)
 

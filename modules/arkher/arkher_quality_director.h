@@ -161,6 +161,10 @@ public:
 	/// Loads a saved quality profile (per-device calibration) and applies it.
 	void apply_preset(const Ref<ArkherQualityPreset> &p_preset);
 
+	/// Profile loaded automatically on startup (e.g. the floor-device profile).
+	void set_startup_preset(const Ref<ArkherQualityPreset> &p_preset);
+	Ref<ArkherQualityPreset> get_startup_preset() const;
+
 protected:
 	void _process(double p_delta);
 
@@ -203,6 +207,8 @@ private:
 	PackedInt32Array volumetric_per_tier = PackedInt32Array({ 0, 0, 1 });
 	PackedInt32Array ssr_per_tier = PackedInt32Array({ 0, 0, 1 });
 	PackedInt32Array msaa_per_tier = PackedInt32Array({ 0, 1, 2 });
+
+	Ref<ArkherQualityPreset> startup_preset;
 
 	double thermal_heat_rate = 0.04;
 	double thermal_cool_rate = 0.02;

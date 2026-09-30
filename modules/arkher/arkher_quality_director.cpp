@@ -126,6 +126,9 @@ void ArkherQualityDirector::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("apply_preset", "preset"), &ArkherQualityDirector::apply_preset);
 
+	ClassDB::bind_method(D_METHOD("set_startup_preset", "preset"), &ArkherQualityDirector::set_startup_preset);
+	ClassDB::bind_method(D_METHOD("get_startup_preset"), &ArkherQualityDirector::get_startup_preset);
+
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "enabled"), "set_enabled", "is_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "target_fps", PROPERTY_HINT_RANGE, "1,240,0.1"), "set_target_fps", "get_target_fps");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "min_scale", PROPERTY_HINT_RANGE, "0.1,1,0.01"), "set_min_scale", "get_min_scale");
@@ -151,6 +154,7 @@ void ArkherQualityDirector::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "thermal_heat_rate", PROPERTY_HINT_RANGE, "0.001,0.5,0.001"), "set_thermal_heat_rate", "get_thermal_heat_rate");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "thermal_cool_rate", PROPERTY_HINT_RANGE, "0.001,0.5,0.001"), "set_thermal_cool_rate", "get_thermal_cool_rate");
 	ADD_PROPERTY(PropertyInfo(Variant::FLOAT, "thermal_warning_threshold", PROPERTY_HINT_RANGE, "0.1,0.95,0.01"), "set_thermal_warning_threshold", "get_thermal_warning_threshold");
+	ADD_PROPERTY(PropertyInfo(Variant::OBJECT, "startup_preset", PROPERTY_HINT_RESOURCE_TYPE, "ArkherQualityPreset"), "set_startup_preset", "get_startup_preset");
 
 	ADD_SIGNAL(MethodInfo("scale_changed", PropertyInfo(Variant::FLOAT, "scale")));
 	ADD_SIGNAL(MethodInfo("tier_changed", PropertyInfo(Variant::INT, "tier")));
@@ -323,6 +327,9 @@ void ArkherQualityDirector::_process(double p_delta) {
 
 	if (!configured) {
 		configured = true;
+		if (startup_preset.is_valid()) {
+			apply_preset(startup_preset);
+		}
 		_configure_upscaler();
 		_apply_tier();
 	}
@@ -547,6 +554,14 @@ void ArkherQualityDirector::apply_preset(const Ref<ArkherQualityPreset> &p_prese
 		_apply_scale();
 		_check_tier(max_scale * _thermal_ceiling());
 	}
+}
+
+void ArkherQualityDirector::set_startup_preset(const Ref<ArkherQualityPreset> &p_preset) {
+	startup_preset = p_preset;
+}
+
+Ref<ArkherQualityPreset> ArkherQualityDirector::get_startup_preset() const {
+	return startup_preset;
 }
 
 void ArkherQualityDirector::set_sdfgi_per_tier(const PackedInt32Array &p_values) {

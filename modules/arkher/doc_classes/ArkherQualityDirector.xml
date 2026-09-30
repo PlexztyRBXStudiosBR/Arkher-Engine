@@ -119,6 +119,9 @@
 		<member name="thermal_warning_threshold" type="float" setter="set_thermal_warning_threshold" getter="get_thermal_warning_threshold" default="0.6">
 			Thermal state at which the ceiling starts lowering [method get_effective_max_scale] and [signal thermal_warning] fires.
 		</member>
+		<member name="startup_preset" type="ArkherQualityPreset" setter="set_startup_preset" getter="get_startup_preset">
+			Profile loaded automatically on startup (for example, the floor-device profile of your target phone). Leave empty to use the inspector values.
+		</member>
 	</members>
 	<signals>
 		<signal name="scale_changed">

@@ -123,4 +123,5 @@ ignore-words-list = [
 	"textin",
 	"thirdparty",
 	"vai",
+	"variante",
 ]

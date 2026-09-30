@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="ArkherQualityProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/arkher_quality/arkher_quality_profile.gd" id="1_profile"]
+
+[resource]
+script = ExtResource("1_profile")
+target_fps = 60.0
+min_scale = 0.4
+max_scale = 0.8
+fsr_sharpness = 0.2
+shadows_enabled_per_tier = PackedInt32Array(0, 1, 1)
+shadow_max_distance_per_tier = PackedFloat32Array(40, 60, 80)
+sdfgi_per_tier = PackedInt32Array(0, 0, 0)
+ssao_per_tier = PackedInt32Array(0, 0, 1)
+ssil_per_tier = PackedInt32Array(0, 0, 1)
+glow_per_tier = PackedInt32Array(1, 1, 1)
+volumetric_per_tier = PackedInt32Array(0, 0, 0)
+ssr_per_tier = PackedInt32Array(0, 0, 0)
+reflections_per_tier = PackedInt32Array(0, 1, 1)
+msaa_per_tier = PackedInt32Array(0, 0, 0)

@@ -1,0 +1,94 @@
+[gd_scene load_steps=11 format=3]
+
+[ext_resource type="Script" path="res://addons/arkher_quality/arkher_quality_director.gd" id="1_director"]
+
+[sub_resource type="StandardMaterial3D" id="mat_ground"]
+albedo_color = Color(0.25, 0.23, 0.2, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="mat_cube"]
+albedo_color = Color(0.85, 0.3, 0.25, 1)
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="mat_ball"]
+albedo_color = Color(0.25, 0.5, 0.9, 1)
+metallic = 0.6
+roughness = 0.25
+
+[sub_resource type="StandardMaterial3D" id="mat_block"]
+albedo_color = Color(0.3, 0.6, 0.45, 1)
+roughness = 0.8
+
+[sub_resource type="PlaneMesh" id="mesh_ground"]
+material = SubResource("mat_ground")
+size = Vector2(40, 40)
+
+[sub_resource type="BoxMesh" id="mesh_cube"]
+material = SubResource("mat_cube")
+size = Vector3(2, 2, 2)
+
+[sub_resource type="SphereMesh" id="mesh_ball"]
+material = SubResource("mat_ball")
+radius = 1.2
+height = 2.4
+
+[sub_resource type="BoxMesh" id="mesh_block"]
+material = SubResource("mat_block")
+size = Vector3(4, 1, 1.5)
+
+[sub_resource type="Environment" id="Environment_1"]
+background_mode = 1
+background_color = Color(0.05, 0.06, 0.09, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.85, 1, 1)
+ambient_light_energy = 0.35
+tonemap_mode = 3
+ssao_enabled = true
+ssao_radius_scale = 0.5
+ssil_enabled = true
+glow_enabled = true
+glow_intensity = 0.4
+sdfgi_enabled = true
+sdfgi_bounces = 1
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.015
+volumetric_fog_albedo = Color(0.6, 0.7, 0.9, 1)
+reflections_enabled = true
+ssr_enabled = true
+
+[node name="QualityDemo" type="Node"]
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Sun" type="DirectionalLight3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 0.6, 0.8, 0, -0.8, 0.6, 0, 8, 0)
+light_energy = 1.4
+shadow_enabled = true
+shadow_max_distance = 80.0
+
+[node name="Camera3D" type="Camera3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, 10)
+
+[node name="Ground" type="MeshInstance3D" parent="World"]
+mesh = SubResource("mesh_ground")
+
+[node name="Cube" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("mesh_cube")
+
+[node name="Ball" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.2, -2)
+mesh = SubResource("mesh_ball")
+
+[node name="Block" type="MeshInstance3D" parent="World"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 0.5, -3)
+mesh = SubResource("mesh_block")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1")
+
+[node name="ArkherQualityDirector" type="Node" parent="."]
+script = ExtResource("1_director")
+min_scale = 0.4
+show_debug_overlay = true
+world_environment = NodePath("../WorldEnvironment")
